@@ -1,0 +1,49 @@
+name: Trigger auto deployment for outlook-sync
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/outlook-sync-AutoDeployTrigger-955eaef5-6af9-4104-8b23-6d8a2cf2f1e3.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.OUTLOOKSYNC_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.OUTLOOKSYNC_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.OUTLOOKSYNC_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: 
+          registryUsername: ${{ secrets.OUTLOOKSYNC_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.OUTLOOKSYNC_REGISTRY_PASSWORD }}
+          containerAppName: outlook-sync
+          resourceGroup: RG-Outlook-sync
+          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
