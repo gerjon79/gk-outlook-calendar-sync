@@ -67,6 +67,26 @@ To stop and clean up the service, type `docker compose down`
 
 If you want SSL termination (e.g. using the free SSL certificates provided by Let's Encrypt), you need to put a reverse proxy (HTTP) server in front of the sync helper service. The reverse proxy then does the SSL termination. See e.g. [here](https://doc.traefik.io/traefik/user-guides/docker-compose/acme-tls/) for how to achieve this with Traefik, or [here](https://github.com/nginx-proxy/acme-companion) for how to use Nginx.
 
+### Hosting on Azure Container Apps
+
+This fork is deployed to Azure Container Apps (resource group `RG-Outlook-sync`, app `outlook-sync`, registry
+`gkoutlooksyncacr`). Every push to `main` triggers `.github/workflows/deploy-azure.yml`, which runs the tests, builds the
+image, pushes it to ACR and rolls out a new revision. The Container App pulls images from ACR using its system-assigned
+managed identity (`AcrPull` role), so no registry passwords are involved.
+
+The workflow logs in to Azure via OIDC and needs these repository secrets: `OUTLOOKSYNC_AZURE_CLIENT_ID`,
+`OUTLOOKSYNC_AZURE_TENANT_ID`, `OUTLOOKSYNC_AZURE_SUBSCRIPTION_ID`.
+
+**API key:** if the `API_KEY` environment variable is set (on Azure it references the Container App secret `api-key`),
+every request except `GET /health` must send the header `X-API-Key: <key>`. In the Power Automate flow, add this header
+to every `HTTP` action that calls the sync helper service. To view or rotate the key:
+
+```bash
+az containerapp secret show -n outlook-sync -g RG-Outlook-sync --secret-name api-key --query value -o tsv
+az containerapp secret set -n outlook-sync -g RG-Outlook-sync --secrets api-key=<new-key>
+az containerapp revision restart -n outlook-sync -g RG-Outlook-sync --revision <active-revision>
+```
+
 ## Developing the _Sync helper service_
 
 ### Package management
