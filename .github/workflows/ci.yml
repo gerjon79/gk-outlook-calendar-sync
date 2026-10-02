@@ -27,7 +27,13 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           poetry install --with test
-          pytest tests
+          if [ -n "$GITHUB_INTEGRATION_TEST_PAT" ]; then
+            pytest tests
+          else
+            # No PAT configured: skip the GitHub integration tests (dummy values only satisfy the import-time checks)
+            echo "GH_INTEGRATION_TEST_PAT secret not set, skipping GitHub integration tests"
+            GITHUB_INTEGRATION_TEST_PAT=dummy pytest tests -k "not github"
+          fi
         env:
           GITHUB_INTEGRATION_TEST_PAT: ${{ secrets.GH_INTEGRATION_TEST_PAT }}
           GITHUB_INTEGRATION_TEST_OWNER_REPO_BRANCH: "MShekow/ng-outlook-google-calendar-sync/github-integration-test"
@@ -42,5 +48,5 @@ jobs:
         run: |
           docker compose up -d
           sleep 5
-          curl http://localhost:8000
+          curl -fsS http://localhost:8000/health
           docker compose down
