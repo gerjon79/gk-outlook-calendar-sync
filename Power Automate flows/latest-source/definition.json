@@ -4,7 +4,7 @@
   "type": "Microsoft.Flow/flows",
   "properties": {
     "apiId": "/providers/Microsoft.PowerApps/apis/shared_logicflows",
-    "displayName": "NG Outlook Google calendar sync v0.3 - release",
+    "displayName": "NG Outlook Google calendar sync v0.4 - release",
     "definition": {
       "metadata": {
         "workflowEntityId": null,
@@ -352,7 +352,7 @@
               {
                 "name": "syncHelperServerUrl",
                 "type": "string",
-                "value": "https://ng-outlook-google-calendar-sync.onrender.com/v1"
+                "value": "https://outlook-sync.graysea-e2b43a26.northeurope.azurecontainerapps.io/v1"
               }
             ]
           },
@@ -593,7 +593,7 @@
         },
         "Setting:_location_of_remote_file_to_upload_calendar_1_data_to_(optional)": {
           "runAfter": {
-            "Setting:_calendar_sync_helper_server_URL": [
+            "Setting:_sync_helper_API_key": [
               "Succeeded"
             ]
           },
@@ -688,7 +688,8 @@
                   "X-Upload-Http-Method": "@variables('uploadHttpMethod')",
                   "X-Auth-Header-Name": "@variables('cal1uploadAuthHeaderName')",
                   "X-Auth-Header-Value": "@variables('cal1uploadAuthHeaderValue')",
-                  "X-Data-Encryption-Password": "@variables('encryptionPassword')"
+                  "X-Data-Encryption-Password": "@variables('encryptionPassword')",
+                  "X-API-Key": "@{variables('syncHelperApiKey')}"
                 },
                 "body": {
                   "events": "@variables('cal1')"
@@ -998,7 +999,8 @@
                   "X-Anonymize-Fields": "@{variables('hideDetails')}",
                   "X-Sync-Events-Without-Attendees": "@{variables('syncEventsWithoutAttendees')}",
                   "X-Relevant-Response-Types": "@variables('eventResponseTypes')",
-                  "X-Data-Encryption-Password": "@variables('encryptionPassword')"
+                  "X-Data-Encryption-Password": "@variables('encryptionPassword')",
+                  "X-API-Key": "@{variables('syncHelperApiKey')}"
                 },
                 "body": {
                   "events": "@body('Get_Outlook_calendar_view_of_events_cal2')?['value']"
@@ -1199,7 +1201,8 @@
                   "X-Anonymize-Fields": "@{variables('hideDetails')}",
                   "X-Sync-Events-Without-Attendees": "@{variables('syncEventsWithoutAttendees')}",
                   "X-Relevant-Response-Types": "@variables('eventResponseTypes')",
-                  "X-Data-Encryption-Password": "@variables('encryptionPassword')"
+                  "X-Data-Encryption-Password": "@variables('encryptionPassword')",
+                  "X-API-Key": "@{variables('syncHelperApiKey')}"
                 },
                 "body": {
                   "events": "@body('Get_Google_calendar_view_of_events_cal2')?['items']"
@@ -1271,7 +1274,8 @@
                   "X-File-Location": "@variables('cal2provider')",
                   "X-Auth-Header-Name": "@variables('cal2downloadAuthHeaderName')",
                   "X-Auth-Header-Value": "@variables('cal2downloadAuthHeaderValue')",
-                  "X-Data-Encryption-Password": "@variables('encryptionPassword')"
+                  "X-Data-Encryption-Password": "@variables('encryptionPassword')",
+                  "X-API-Key": "@{variables('syncHelperApiKey')}"
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
@@ -1895,13 +1899,32 @@
               "X-Unique-Sync-Prefix": "@variables('uniqueSyncPrefix')",
               "X-SyncBlocker-Title-Prefix": "@variables('syncBlockerTitlePrefix')",
               "X-Anonymized-Title-Placeholder": "@variables('anonymizedSbTitle')",
-              "X-Ignore-Description-Equality-Check": "@{variables('ignoreDescriptionComparison')}"
+              "X-Ignore-Description-Equality-Check": "@{variables('ignoreDescriptionComparison')}",
+              "X-API-Key": "@{variables('syncHelperApiKey')}"
             },
             "body": {
               "cal1events": "@variables('cal1')",
               "cal2events": "@variables('cal2')"
             }
           }
+        },
+        "Setting:_sync_helper_API_key": {
+          "runAfter": {
+            "Setting:_calendar_sync_helper_server_URL": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "syncHelperApiKey",
+                "type": "string",
+                "value": "PASTE-YOUR-API-KEY-HERE"
+              }
+            ]
+          },
+          "description": "API key of the sync helper service (sent as X-API-Key header). Get it from the Azure portal: Container App outlook-sync > Secrets > api-key"
         }
       },
       "description": "See https://github.com/MShekow/outlook-calendar-sync"
