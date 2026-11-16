@@ -80,10 +80,6 @@ ACR and rolls out a new revision. The Container App pulls images with the user-a
 and needs these repository secrets: `OUTLOOKSYNC_AZURE_CLIENT_ID`, `OUTLOOKSYNC_AZURE_TENANT_ID`,
 `OUTLOOKSYNC_AZURE_SUBSCRIPTION_ID`.
 
-**Calendar sync as Logic Apps:** `logic-app/` contains the Outlook-only flow converted to an Azure Logic App
-(`convert_flow.py` generates `workflow.json`; `main.bicep` deploys one sync pair with its two Office 365 connections; one
-`.bicepparam` file per pair in `logic-app/pairs/`). After deploying a pair, authorize both connections (Azure portal >
-API connection > Edit API connection > Authorize), then redeploy with `enabled = true`.
 
 **API key:** if the `API_KEY` environment variable is set (on Azure it references the Container App secret `api-key`),
 every request except `GET /health` must send the header `X-API-Key: <key>`. In the Power Automate flow, add this header

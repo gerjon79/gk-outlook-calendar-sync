@@ -7,7 +7,6 @@ on:
     paths-ignore:
       - '**.md'
       - 'Power Automate flows/**'
-      - 'logic-app/**'
       - 'infra/**'
   workflow_dispatch: { }
 
