@@ -69,13 +69,21 @@ If you want SSL termination (e.g. using the free SSL certificates provided by Le
 
 ### Hosting on Azure Container Apps
 
-This fork is deployed to Azure Container Apps (resource group `RG-Outlook-sync`, app `outlook-sync`, registry
-`gkoutlooksyncacr`). Every push to `main` triggers `.github/workflows/deploy-azure.yml`, which runs the tests, builds the
-image, pushes it to ACR and rolls out a new revision. The Container App pulls images from ACR using its system-assigned
-managed identity (`AcrPull` role), so no registry passwords are involved.
+This fork is deployed to Azure Container Apps in the subscription "RawWorks - Demo" (resource group `RG-Outlook-sync`,
+West Europe, app `outlook-sync`, registry `rwoutlooksyncacr`). The infrastructure is defined in `infra/main.bicep`
+(registry, identities, Container Apps environment, app). On a fresh environment, deploy it with `deployApp=false`, build
+the image into the registry (`az acr build -r <acr> -t outlook-sync:latest .`), then deploy again with `deployApp=true`.
 
-The workflow logs in to Azure via OIDC and needs these repository secrets: `OUTLOOKSYNC_AZURE_CLIENT_ID`,
-`OUTLOOKSYNC_AZURE_TENANT_ID`, `OUTLOOKSYNC_AZURE_SUBSCRIPTION_ID`.
+Every push to `main` triggers `.github/workflows/deploy-azure.yml`, which runs the tests, builds the image, pushes it to
+ACR and rolls out a new revision. The Container App pulls images with the user-assigned identity `outlook-sync-acr-pull`
+(`AcrPull` role), so no registry passwords are involved. The workflow logs in via OIDC as `outlook-sync-github-deploy`
+and needs these repository secrets: `OUTLOOKSYNC_AZURE_CLIENT_ID`, `OUTLOOKSYNC_AZURE_TENANT_ID`,
+`OUTLOOKSYNC_AZURE_SUBSCRIPTION_ID`.
+
+**Calendar sync as Logic Apps:** `logic-app/` contains the Outlook-only flow converted to an Azure Logic App
+(`convert_flow.py` generates `workflow.json`; `main.bicep` deploys one sync pair with its two Office 365 connections; one
+`.bicepparam` file per pair in `logic-app/pairs/`). After deploying a pair, authorize both connections (Azure portal >
+API connection > Edit API connection > Authorize), then redeploy with `enabled = true`.
 
 **API key:** if the `API_KEY` environment variable is set (on Azure it references the Container App secret `api-key`),
 every request except `GET /health` must send the header `X-API-Key: <key>`. In the Power Automate flow, add this header

@@ -7,6 +7,8 @@ on:
     paths-ignore:
       - '**.md'
       - 'Power Automate flows/**'
+      - 'logic-app/**'
+      - 'infra/**'
   workflow_dispatch: { }
 
 concurrency:
@@ -14,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ACR_NAME: gkoutlooksyncacr
+  ACR_NAME: rwoutlooksyncacr
   RESOURCE_GROUP: RG-Outlook-sync
   CONTAINER_APP_NAME: outlook-sync
   IMAGE_NAME: outlook-sync

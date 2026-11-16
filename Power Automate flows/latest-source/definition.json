@@ -352,7 +352,7 @@
               {
                 "name": "syncHelperServerUrl",
                 "type": "string",
-                "value": "https://outlook-sync.graysea-e2b43a26.northeurope.azurecontainerapps.io/v1"
+                "value": "https://outlook-sync.braveisland-42f2d157.westeurope.azurecontainerapps.io/v1"
               }
             ]
           },

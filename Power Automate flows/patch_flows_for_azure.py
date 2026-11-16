@@ -12,7 +12,7 @@ from pathlib import Path
 
 SOURCE_VERSION = "v0.3"
 TARGET_VERSION = "v0.4"
-SERVER_URL = "https://outlook-sync.graysea-e2b43a26.northeurope.azurecontainerapps.io/v1"
+SERVER_URL = "https://outlook-sync.braveisland-42f2d157.westeurope.azurecontainerapps.io/v1"
 API_KEY_PLACEHOLDER = "PASTE-YOUR-API-KEY-HERE"
 
 URL_SETTING = "Setting:_calendar_sync_helper_server_URL"
